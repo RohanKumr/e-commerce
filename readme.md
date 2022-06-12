@@ -1,4 +1,4 @@
 # Arrivals
 
-> Ecommerce app with featuere <br/>
+> Ecommerce app with awesome features <br/>
 New product arrivals every time you visit!
