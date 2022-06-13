@@ -3,13 +3,28 @@ const catchAsyncError = require("../middleware/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 const User = require("../models/userModel");
 
-const isAuthenticatedUser = catchAsyncError(async (req, res, next) => {
+exports.isAuthenticatedUser = catchAsyncError(async (req, res, next) => {
   //get token from cookie;
   const { token } = req.cookies;
-  !token && next(new ErrorHandler("Login required", 401));
+  if (!token) {
+    return next(new ErrorHandler("Login kaun karega bhai?", 401));
+  }
   const decodedData = jsonwebtoken.verify(token, process.env.JWT_SECRET);
   req.user = await User.findById(decodedData.id);
   next();
 });
 
-module.exports = isAuthenticatedUser;
+exports.authorisedRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new ErrorHandler(
+          `${req.user.role} does not have access to perform this operation`,
+          403
+        )
+      );
+    }
+
+    next();
+  };
+};

@@ -39,6 +39,11 @@ const productSchema = new mongoose.Schema({
     maxLength: [4, "Not enough stock"],
     default: 1,
   },
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: "User",
+    required: true,
+  },
   numOfReviews: {
     type: Number,
     default: 0,
