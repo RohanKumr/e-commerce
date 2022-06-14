@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema({
   },
 
   resetPasswordToken: String,
-  resetPasswrodExpire: Date,
+  resetPasswordExpire: Date,
 });
 
 // ENCRYPT password here
@@ -79,7 +79,7 @@ userSchema.methods.getResetPasswordToken = function () {
     .update(resetToken)
     .digest("hex");
 
-  this.resetPasswrodExpire = Date.now() + 15 * 60 * 1000;
+  this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
   return resetToken;
 };
 

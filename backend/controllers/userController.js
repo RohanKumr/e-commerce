@@ -132,3 +132,71 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
   await user.save();
   sendToken(user, 200, res);
 });
+
+exports.getUserDetails = catchAsyncError(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+
+  res.status(200).json({
+    status: true,
+    user,
+  });
+});
+
+exports.changePassword = catchAsyncError(async (req, res, next) => {
+  const { oldPassword, newPassword, confirmPassword } = req.body;
+  const user = await User.findById(req.user.id).select("+password");
+  const passwordsMatch = user.comparePasswords(oldPassword);
+  if (!passwordsMatch) {
+    return next(new ErrorHandler("Incorrect password"), 400);
+  }
+  if (newPassword !== confirmPassword) {
+    return next(new ErrorHandler("passwords don't match"), 400);
+  }
+  user.password = newPassword;
+  await user.save();
+  sendToken(user, 200, res);
+});
+
+exports.updateProfile = catchAsyncError(async (req, res, next) => {
+  const updatedUserData = {
+    email: req.body.email,
+    name: req.body.name,
+  };
+
+  const user = await User.findByIdAndUpdate(req.user.id, updatedUserData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+
+  await user.save();
+
+  res.status(200).json({
+    status: true,
+    message: "Your profile has been updated",
+  });
+});
+
+exports.getAllUsers = catchAsyncError(async (req, res, next) => {
+  const users = await User.find();
+
+  if (!users) {
+    return next(new ErrorHandler("No users found"));
+  }
+
+  res.status(200).json({
+    status: true,
+    users,
+  });
+});
+
+exports.getAdminUser = catchAsyncError(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return next(new ErrorHandler("no user found", 400));
+  }
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
